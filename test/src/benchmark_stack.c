@@ -5,23 +5,23 @@
 
 
 /****************************************************************************/
-void benchmark_lfds611_stack( void )
+void benchmark_lfds_stack( void )
 {
   unsigned int
     loop,
     thread_count,
     cpu_count;
 
-  struct lfds611_stack_state
+  struct lfds_stack_state
     *ss;
 
-  struct lfds611_stack_benchmark
+  struct lfds_stack_benchmark
     *sb;
 
   thread_state_t
     *thread_handles;
 
-  lfds611_atom_t
+  lfds_atom_t
     total_operations_for_full_test_for_all_cpus,
     total_operations_for_full_test_for_all_cpus_for_one_cpu = 0;
 
@@ -42,18 +42,18 @@ void benchmark_lfds611_stack( void )
 
   thread_handles = (thread_state_t *) malloc( sizeof(thread_state_t) * cpu_count );
 
-  sb = (struct lfds611_stack_benchmark *) malloc( sizeof(struct lfds611_stack_benchmark) * cpu_count );
+  sb = (struct lfds_stack_benchmark *) malloc( sizeof(struct lfds_stack_benchmark) * cpu_count );
 
   // TRD : print the benchmark ID and CSV header
   printf( "\n"
           "Release %s Stack Benchmark #1\n"
-          "CPUs,total ops,mean ops/sec per CPU,standard deviation,scalability\n", LFDS611_RELEASE_NUMBER_STRING );
+          "CPUs,total ops,mean ops/sec per CPU,standard deviation,scalability\n", LFDS_RELEASE_NUMBER_STRING );
 
   // TRD : we run CPU count times for scalability
   for( thread_count = 1 ; thread_count <= cpu_count ; thread_count++ )
   {
     // TRD : initialisation
-    lfds611_stack_new( &ss, 1000 );
+    lfds_stack_new( &ss, 1000 );
 
     for( loop = 0 ; loop < cpu_count ; loop++ )
     {
@@ -63,7 +63,7 @@ void benchmark_lfds611_stack( void )
 
     // TRD : main test
     for( loop = 0 ; loop < thread_count ; loop++ )
-      abstraction_thread_start( &thread_handles[loop], loop, benchmark_lfds611_stack_thread_push_and_pop, sb+loop );
+      abstraction_thread_start( &thread_handles[loop], loop, benchmark_lfds_stack_thread_push_and_pop, sb+loop );
 
     for( loop = 0 ; loop < thread_count ; loop++ )
       abstraction_thread_wait( thread_handles[loop] );
@@ -93,7 +93,7 @@ void benchmark_lfds611_stack( void )
     printf( "%u,%u,%.0f,%.0f,%0.2f\n", thread_count, (unsigned int) total_operations_for_full_test_for_all_cpus, mean_operations_per_second_per_cpu, std_dev_per_second_per_cpu, scalability );
 
     // TRD : cleanup
-    lfds611_stack_delete( ss, NULL, NULL );
+    lfds_stack_delete( ss, NULL, NULL );
   }
 
   free( sb );
@@ -108,9 +108,9 @@ void benchmark_lfds611_stack( void )
 
 
 /****************************************************************************/
-thread_return_t CALLING_CONVENTION benchmark_lfds611_stack_thread_push_and_pop( void *stack_benchmark )
+thread_return_t CALLING_CONVENTION benchmark_lfds_stack_thread_push_and_pop( void *stack_benchmark )
 {
-  struct lfds611_stack_benchmark
+  struct lfds_stack_benchmark
     *sb;
 
   void
@@ -121,14 +121,14 @@ thread_return_t CALLING_CONVENTION benchmark_lfds611_stack_thread_push_and_pop( 
 
   assert( stack_benchmark != NULL );
 
-  sb = (struct lfds611_stack_benchmark *) stack_benchmark;
+  sb = (struct lfds_stack_benchmark *) stack_benchmark;
 
   time( &start_time );
 
   while( time(NULL) < start_time + 10 )
   {
-    lfds611_stack_push( sb->ss, user_data );
-    lfds611_stack_pop( sb->ss, &user_data );
+    lfds_stack_push( sb->ss, user_data );
+    lfds_stack_pop( sb->ss, &user_data );
 
     sb->operation_count += 2;
   }

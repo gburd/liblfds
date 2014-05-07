@@ -7,7 +7,7 @@
 /****************************************************************************/
 int main( int argc, char **argv )
 {
-  enum lfds611_test_operation
+  enum lfds_test_operation
     operation = UNKNOWN;
 
   unsigned int
@@ -58,12 +58,12 @@ int main( int argc, char **argv )
                 "Test Iteration %02u\n"
                 "=================\n", loop );
 
-        test_lfds611_abstraction();
-        test_lfds611_freelist();
-        test_lfds611_queue();
-        test_lfds611_ringbuffer();
-        test_lfds611_slist();
-        test_lfds611_stack();
+        test_lfds_abstraction();
+        test_lfds_freelist();
+        test_lfds_queue();
+        test_lfds_ringbuffer();
+        test_lfds_slist();
+        test_lfds_stack();
       }
     break;
 
@@ -74,10 +74,10 @@ int main( int argc, char **argv )
                 "Benchmark Iteration %02u\n"
                 "========================\n", loop );
 
-        benchmark_lfds611_freelist();
-        benchmark_lfds611_queue();
-        benchmark_lfds611_ringbuffer();
-        benchmark_lfds611_stack();
+        benchmark_lfds_freelist();
+        benchmark_lfds_queue();
+        benchmark_lfds_ringbuffer();
+        benchmark_lfds_stack();
       }
     break;
   }

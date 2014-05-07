@@ -5,7 +5,7 @@
 
 
 /****************************************************************************/
-void test_lfds611_abstraction( void )
+void test_lfds_abstraction( void )
 {
   printf( "\n"
           "Abstraction Tests\n"
@@ -32,18 +32,18 @@ void abstraction_test_increment( void )
   thread_state_t
     *thread_handles;
 
-  LFDS611_ALIGN(LFDS611_ALIGN_SINGLE_POINTER) volatile lfds611_atom_t
+  LFDS_ALIGN(LFDS_ALIGN_SINGLE_POINTER) volatile lfds_atom_t
     shared_counter,
     atomic_shared_counter;
 
-  /* TRD : here we test lfds611_abstraction_increment
+  /* TRD : here we test lfds_abstraction_increment
 
            first, we run one thread per CPU where each thread increments
            a shared counter 10,000,000 times - however, this first test
            does NOT use atomic increment; it uses "++"
 
            second, we repeat the exercise, but this time using
-           lfds611_abstraction_increment()
+           lfds_abstraction_increment()
 
            if the final value in the first test is less than (10,000,000*cpu_count)
            then the system is sensitive to non-atomic increments; this means if
@@ -64,7 +64,7 @@ void abstraction_test_increment( void )
   shared_counter = 0;
   atomic_shared_counter = 0;
 
-  LFDS611_BARRIER_STORE;
+  LFDS_BARRIER_STORE;
 
   thread_handles = malloc( sizeof(thread_state_t) * cpu_count );
 
@@ -106,9 +106,9 @@ thread_return_t CALLING_CONVENTION abstraction_test_internal_thread_increment( v
 {
   assert( shared_counter != NULL );
 
-  LFDS611_BARRIER_LOAD;
+  LFDS_BARRIER_LOAD;
 
-  lfds611_liblfds_abstraction_test_helper_increment_non_atomic( shared_counter );
+  lfds_liblfds_abstraction_test_helper_increment_non_atomic( shared_counter );
 
   return( (thread_return_t) EXIT_SUCCESS );
 }
@@ -122,9 +122,9 @@ thread_return_t CALLING_CONVENTION abstraction_test_internal_thread_atomic_incre
 {
   assert( shared_counter != NULL );
 
-  LFDS611_BARRIER_LOAD;
+  LFDS_BARRIER_LOAD;
 
-  lfds611_liblfds_abstraction_test_helper_increment_atomic( shared_counter );
+  lfds_liblfds_abstraction_test_helper_increment_atomic( shared_counter );
 
   return( (thread_return_t) EXIT_SUCCESS );
 }
@@ -146,18 +146,18 @@ void abstraction_test_cas( void )
   struct abstraction_test_cas_state
     *atcs;
 
-  LFDS611_ALIGN(LFDS611_ALIGN_SINGLE_POINTER) volatile lfds611_atom_t
+  LFDS_ALIGN(LFDS_ALIGN_SINGLE_POINTER) volatile lfds_atom_t
     shared_counter;
 
-  lfds611_atom_t
+  lfds_atom_t
     local_total = 0;
 
   // TRD : number_logical_processors can be any value in its range
 
-  /* TRD : here we test lfds611_abstraction_cas
+  /* TRD : here we test lfds_abstraction_cas
 
            we run one thread per CPU
-           we use lfds611_abstraction_cas() to increment a shared counter
+           we use lfds_abstraction_cas() to increment a shared counter
            every time a thread successfully increments the counter,
            it increments a thread local counter
            the threads run for ten seconds
@@ -171,7 +171,7 @@ void abstraction_test_cas( void )
 
   shared_counter = 0;
 
-  LFDS611_BARRIER_STORE;
+  LFDS_BARRIER_STORE;
 
   atcs = malloc( sizeof(struct abstraction_test_cas_state) * cpu_count );
 
@@ -221,9 +221,9 @@ thread_return_t CALLING_CONVENTION abstraction_test_internal_thread_cas( void *a
 
   atcs = (struct abstraction_test_cas_state *) abstraction_test_cas_state;
 
-  LFDS611_BARRIER_LOAD;
+  LFDS_BARRIER_LOAD;
 
-  lfds611_liblfds_abstraction_test_helper_cas( atcs->shared_counter, &atcs->local_counter );
+  lfds_liblfds_abstraction_test_helper_cas( atcs->shared_counter, &atcs->local_counter );
 
   return( (thread_return_t) EXIT_SUCCESS );
 }
@@ -245,16 +245,16 @@ void abstraction_test_dcas( void )
   struct abstraction_test_dcas_state
     *atds;
 
-  LFDS611_ALIGN(LFDS611_ALIGN_DOUBLE_POINTER) volatile lfds611_atom_t
+  LFDS_ALIGN(LFDS_ALIGN_DOUBLE_POINTER) volatile lfds_atom_t
     shared_counter[2] = { 0, 0 };
 
-  lfds611_atom_t
+  lfds_atom_t
     local_total = 0;
 
-  /* TRD : here we test lfds611_abstraction_dcas
+  /* TRD : here we test lfds_abstraction_dcas
 
            we run one thread per CPU
-           we use lfds611_abstraction_dcas() to increment a shared counter
+           we use lfds_abstraction_dcas() to increment a shared counter
            every time a thread successfully increments the counter,
            it increments a thread local counter
            the threads run for ten seconds
@@ -274,7 +274,7 @@ void abstraction_test_dcas( void )
     (atds+loop)->local_counter = 0;
   }
 
-  LFDS611_BARRIER_STORE;
+  LFDS_BARRIER_STORE;
 
   thread_handles = malloc( sizeof(thread_state_t) * cpu_count );
 
@@ -316,9 +316,9 @@ thread_return_t CALLING_CONVENTION abstraction_test_internal_thread_dcas( void *
 
   atds = (struct abstraction_test_dcas_state *) abstraction_test_dcas_state;
 
-  LFDS611_BARRIER_LOAD;
+  LFDS_BARRIER_LOAD;
 
-  lfds611_liblfds_abstraction_test_helper_dcas( atds->shared_counter, &atds->local_counter );
+  lfds_liblfds_abstraction_test_helper_dcas( atds->shared_counter, &atds->local_counter );
 
   return( (thread_return_t) EXIT_SUCCESS );
 }

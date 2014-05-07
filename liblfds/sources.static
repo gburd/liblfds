@@ -1,0 +1,35 @@
+MSC_WARNING_LEVEL = /WX /W4
+TARGETNAME        = liblfds
+TARGETPATH        = ../../bin/
+TARGETTYPE        = DRIVER_LIBRARY
+UMTYPE            = nt
+USER_C_FLAGS      = /DWIN_KERNEL_BUILD
+
+INCLUDES = ..;../../inc/
+SOURCES  = lfds_abstraction_free.c \
+           lfds_abstraction_malloc.c \
+           lfds_freelist_delete.c \
+           lfds_freelist_get_and_set.c \
+           lfds_freelist_new.c \
+           lfds_freelist_pop_push.c \
+           lfds_freelist_query.c \
+           lfds_liblfds_abstraction_test_helpers.c \
+           lfds_liblfds_aligned_free.c \
+           lfds_liblfds_aligned_malloc.c \
+           lfds_queue_delete.c \
+           lfds_queue_new.c \
+           lfds_queue_query.c \
+           lfds_queue_queue.c \
+           lfds_ringbuffer_delete.c \
+           lfds_ringbuffer_get_and_put.c \
+           lfds_ringbuffer_new.c \
+           lfds_ringbuffer_query.c \
+           lfds_slist_delete.c \
+           lfds_slist_get_and_set.c \
+           lfds_slist_link.c \
+           lfds_slist_new.c \
+           lfds_stack_delete.c \
+           lfds_stack_new.c \
+           lfds_stack_push_pop.c \
+           lfds_stack_query.c
+

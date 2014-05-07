@@ -5,23 +5,23 @@
 
 
 /****************************************************************************/
-void benchmark_lfds611_ringbuffer( void )
+void benchmark_lfds_ringbuffer( void )
 {
   unsigned int
     loop,
     thread_count,
     cpu_count;
 
-  struct lfds611_ringbuffer_state
+  struct lfds_ringbuffer_state
     *rs;
 
-  struct lfds611_ringbuffer_benchmark
+  struct lfds_ringbuffer_benchmark
     *rb;
 
   thread_state_t
     *thread_handles;
 
-  lfds611_atom_t
+  lfds_atom_t
     total_operations_for_full_test_for_all_cpus,
     total_operations_for_full_test_for_all_cpus_for_one_cpu = 0;
 
@@ -42,18 +42,18 @@ void benchmark_lfds611_ringbuffer( void )
 
   thread_handles = (thread_state_t *) malloc( sizeof(thread_state_t) * cpu_count );
 
-  rb = (struct lfds611_ringbuffer_benchmark *) malloc( sizeof(struct lfds611_ringbuffer_benchmark) * cpu_count );
+  rb = (struct lfds_ringbuffer_benchmark *) malloc( sizeof(struct lfds_ringbuffer_benchmark) * cpu_count );
 
   // TRD : print the benchmark ID and CSV header
   printf( "\n"
           "Release %s Ringbuffer Benchmark #1\n"
-          "CPUs,total ops,mean ops/sec per CPU,standard deviation,scalability\n", LFDS611_RELEASE_NUMBER_STRING );
+          "CPUs,total ops,mean ops/sec per CPU,standard deviation,scalability\n", LFDS_RELEASE_NUMBER_STRING );
 
   // TRD : we run CPU count times for scalability
   for( thread_count = 1 ; thread_count <= cpu_count ; thread_count++ )
   {
     // TRD : initialisation
-    lfds611_ringbuffer_new( &rs, 1000, NULL, NULL );
+    lfds_ringbuffer_new( &rs, 1000, NULL, NULL );
 
     for( loop = 0 ; loop < cpu_count ; loop++ )
     {
@@ -63,7 +63,7 @@ void benchmark_lfds611_ringbuffer( void )
 
     // TRD : main test
     for( loop = 0 ; loop < thread_count ; loop++ )
-      abstraction_thread_start( &thread_handles[loop], loop, benchmark_lfds611_ringbuffer_thread_write_and_read, rb+loop );
+      abstraction_thread_start( &thread_handles[loop], loop, benchmark_lfds_ringbuffer_thread_write_and_read, rb+loop );
 
     for( loop = 0 ; loop < thread_count ; loop++ )
       abstraction_thread_wait( thread_handles[loop] );
@@ -93,7 +93,7 @@ void benchmark_lfds611_ringbuffer( void )
     printf( "%u,%u,%.0f,%.0f,%0.2f\n", thread_count, (unsigned int) total_operations_for_full_test_for_all_cpus, mean_operations_per_second_per_cpu, std_dev_per_second_per_cpu, scalability );
 
     // TRD : cleanup
-    lfds611_ringbuffer_delete( rs, NULL, NULL );
+    lfds_ringbuffer_delete( rs, NULL, NULL );
   }
 
   free( rb );
@@ -108,12 +108,12 @@ void benchmark_lfds611_ringbuffer( void )
 
 
 /****************************************************************************/
-thread_return_t CALLING_CONVENTION benchmark_lfds611_ringbuffer_thread_write_and_read( void *ringbuffer_benchmark )
+thread_return_t CALLING_CONVENTION benchmark_lfds_ringbuffer_thread_write_and_read( void *ringbuffer_benchmark )
 {
-  struct lfds611_ringbuffer_benchmark
+  struct lfds_ringbuffer_benchmark
     *rb;
 
-  struct lfds611_freelist_element
+  struct lfds_freelist_element
     *fe;
 
   time_t
@@ -121,17 +121,17 @@ thread_return_t CALLING_CONVENTION benchmark_lfds611_ringbuffer_thread_write_and
 
   assert( ringbuffer_benchmark != NULL );
 
-  rb = (struct lfds611_ringbuffer_benchmark *) ringbuffer_benchmark;
+  rb = (struct lfds_ringbuffer_benchmark *) ringbuffer_benchmark;
 
   time( &start_time );
 
   while( time(NULL) < start_time + 10 )
   {
-    lfds611_ringbuffer_get_write_element( rb->rs, &fe, NULL );
-    lfds611_ringbuffer_put_write_element( rb->rs, fe );
+    lfds_ringbuffer_get_write_element( rb->rs, &fe, NULL );
+    lfds_ringbuffer_put_write_element( rb->rs, fe );
 
-    lfds611_ringbuffer_get_read_element( rb->rs, &fe );
-    lfds611_ringbuffer_put_read_element( rb->rs, fe );
+    lfds_ringbuffer_get_read_element( rb->rs, &fe );
+    lfds_ringbuffer_put_read_element( rb->rs, fe );
 
     rb->operation_count += 2;
   }

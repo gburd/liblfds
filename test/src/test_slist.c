@@ -5,7 +5,7 @@
 
 
 /****************************************************************************/
-void test_lfds611_slist( void )
+void test_lfds_slist( void )
 {
   printf( "\n"
           "SList Tests\n"
@@ -29,10 +29,10 @@ void test_slist_new_delete_get( void )
     loop,
     cpu_count;
 
-  struct lfds611_slist_state
+  struct lfds_slist_state
     *ss;
 
-  struct lfds611_slist_element
+  struct lfds_slist_element
     *se = NULL;
 
   struct slist_test_state
@@ -46,8 +46,8 @@ void test_slist_new_delete_get( void )
     total_delete_count = 0,
     element_count = 0;
 
-  enum lfds611_data_structure_validity
-    dvs = LFDS611_VALIDITY_VALID;
+  enum lfds_data_structure_validity
+    dvs = LFDS_VALIDITY_VALID;
 
   /* TRD : two threads per CPU
            first simply alternates between new_head() and new_next() (next on element created by head)
@@ -60,7 +60,7 @@ void test_slist_new_delete_get( void )
 
   cpu_count = abstraction_cpu_count();
 
-  lfds611_slist_new( &ss, NULL, NULL );
+  lfds_slist_new( &ss, NULL, NULL );
 
   sts = malloc( sizeof(struct slist_test_state) * cpu_count * 2 );
 
@@ -91,15 +91,15 @@ void test_slist_new_delete_get( void )
     total_delete_count += (sts+loop)->delete_count;
   }
 
-  while( NULL != lfds611_slist_get_head_and_then_next(ss, &se) )
+  while( NULL != lfds_slist_get_head_and_then_next(ss, &se) )
     element_count++;
 
   if( total_create_count - total_delete_count - element_count != 0 )
-    dvs = LFDS611_VALIDITY_INVALID_TEST_DATA;
+    dvs = LFDS_VALIDITY_INVALID_TEST_DATA;
 
   free( sts );
 
-  lfds611_slist_delete( ss );
+  lfds_slist_delete( ss );
 
   internal_display_test_result( 1, "slist", dvs );
 
@@ -119,23 +119,23 @@ thread_return_t CALLING_CONVENTION slist_test_internal_thread_new_delete_get_new
   time_t
     start_time;
 
-  struct lfds611_slist_element
+  struct lfds_slist_element
     *se = NULL;
 
   assert( slist_test_state != NULL );
 
   sts = (struct slist_test_state *) slist_test_state;
 
-  lfds611_slist_use( sts->ss );
+  lfds_slist_use( sts->ss );
 
   time( &start_time );
 
   while( time(NULL) < start_time + 1 )
   {
     if( sts->create_count % 2 == 0 )
-      se = lfds611_slist_new_head( sts->ss, NULL );
+      se = lfds_slist_new_head( sts->ss, NULL );
     else
-      lfds611_slist_new_next( se, NULL );
+      lfds_slist_new_next( se, NULL );
 
     sts->create_count++;
   }
@@ -156,27 +156,27 @@ thread_return_t CALLING_CONVENTION slist_test_internal_thread_new_delete_get_del
   time_t
     start_time;
 
-  struct lfds611_slist_element
+  struct lfds_slist_element
     *se = NULL;
 
   assert( slist_test_state != NULL );
 
   sts = (struct slist_test_state *) slist_test_state;
 
-  lfds611_slist_use( sts->ss );
+  lfds_slist_use( sts->ss );
 
   time( &start_time );
 
   while( time(NULL) < start_time + 1 )
   {
     if( se == NULL )
-      lfds611_slist_get_head( sts->ss, &se );
+      lfds_slist_get_head( sts->ss, &se );
     else
-      lfds611_slist_get_next( se, &se );
+      lfds_slist_get_next( se, &se );
 
     if( se != NULL )
     {
-      if( 1 == lfds611_slist_logically_delete_element(sts->ss, se) )
+      if( 1 == lfds_slist_logically_delete_element(sts->ss, se) )
         sts->delete_count++;
     }
   }
@@ -195,10 +195,10 @@ void test_slist_get_set_user_data( void )
     loop,
     cpu_count;
 
-  struct lfds611_slist_state
+  struct lfds_slist_state
     *ss;
 
-  struct lfds611_slist_element
+  struct lfds_slist_element
     *se = NULL;
 
   struct slist_test_state
@@ -207,19 +207,19 @@ void test_slist_get_set_user_data( void )
   thread_state_t
     *thread_handles;
 
-  lfds611_atom_t
+  lfds_atom_t
     thread_and_count,
     thread,
     count,
     *per_thread_counters,
     *per_thread_drop_flags;
 
-  enum lfds611_data_structure_validity
-    dvs = LFDS611_VALIDITY_VALID;
+  enum lfds_data_structure_validity
+    dvs = LFDS_VALIDITY_VALID;
 
   /* TRD : create a list of (cpu_count*10) elements, user data 0
            one thread per CPU
-           each thread loops, setting user_data to ((thread_number << (sizeof(lfds611_atom_t)*8-8)) | count)
+           each thread loops, setting user_data to ((thread_number << (sizeof(lfds_atom_t)*8-8)) | count)
            validation is to scan list, count on a per thread basis should go down only once
   */
 
@@ -227,17 +227,17 @@ void test_slist_get_set_user_data( void )
 
   cpu_count = abstraction_cpu_count();
 
-  lfds611_slist_new( &ss, NULL, NULL );
+  lfds_slist_new( &ss, NULL, NULL );
 
   for( loop = 0 ; loop < cpu_count * 10 ; loop++ )
-    lfds611_slist_new_head( ss, NULL );
+    lfds_slist_new_head( ss, NULL );
 
   sts = malloc( sizeof(struct slist_test_state) * cpu_count );
 
   for( loop = 0 ; loop < cpu_count ; loop++ )
   {
     (sts+loop)->ss = ss;
-    (sts+loop)->thread_and_count = (lfds611_atom_t) loop << (sizeof(lfds611_atom_t)*8-8);
+    (sts+loop)->thread_and_count = (lfds_atom_t) loop << (sizeof(lfds_atom_t)*8-8);
   }
 
   thread_handles = malloc( sizeof(thread_state_t) * cpu_count );
@@ -251,8 +251,8 @@ void test_slist_get_set_user_data( void )
   free( thread_handles );
 
   // now validate
-  per_thread_counters = malloc( sizeof(lfds611_atom_t) * cpu_count );
-  per_thread_drop_flags = malloc( sizeof(lfds611_atom_t) * cpu_count );
+  per_thread_counters = malloc( sizeof(lfds_atom_t) * cpu_count );
+  per_thread_drop_flags = malloc( sizeof(lfds_atom_t) * cpu_count );
 
   for( loop = 0 ; loop < cpu_count ; loop++ )
   {
@@ -260,16 +260,16 @@ void test_slist_get_set_user_data( void )
     *(per_thread_drop_flags+loop) = 0;
   }
 
-  while( dvs == LFDS611_VALIDITY_VALID and NULL != lfds611_slist_get_head_and_then_next(ss, &se) )
+  while( dvs == LFDS_VALIDITY_VALID and NULL != lfds_slist_get_head_and_then_next(ss, &se) )
   {
-    lfds611_slist_get_user_data_from_element( se, (void **) &thread_and_count );
+    lfds_slist_get_user_data_from_element( se, (void **) &thread_and_count );
 
-    thread = thread_and_count >> (sizeof(lfds611_atom_t)*8-8);
+    thread = thread_and_count >> (sizeof(lfds_atom_t)*8-8);
     count = (thread_and_count << 8) >> 8;
 
     if( thread >= cpu_count )
     {
-      dvs = LFDS611_VALIDITY_INVALID_TEST_DATA;
+      dvs = LFDS_VALIDITY_INVALID_TEST_DATA;
       break;
     }
 
@@ -283,7 +283,7 @@ void test_slist_get_set_user_data( void )
 
     if( count < per_thread_counters[thread] and per_thread_drop_flags[thread] == 1 )
     {
-      dvs = LFDS611_VALIDITY_INVALID_ADDITIONAL_ELEMENTS;
+      dvs = LFDS_VALIDITY_INVALID_ADDITIONAL_ELEMENTS;
       break;
     }
 
@@ -295,7 +295,7 @@ void test_slist_get_set_user_data( void )
     }
 
     if( count < per_thread_counters[thread] )
-      dvs = LFDS611_VALIDITY_INVALID_ADDITIONAL_ELEMENTS;
+      dvs = LFDS_VALIDITY_INVALID_ADDITIONAL_ELEMENTS;
 
     if( count >= per_thread_counters[thread] )
       per_thread_counters[thread] = count;
@@ -306,7 +306,7 @@ void test_slist_get_set_user_data( void )
 
   free( sts );
 
-  lfds611_slist_delete( ss );
+  lfds_slist_delete( ss );
 
   internal_display_test_result( 1, "slist", dvs );
 
@@ -326,25 +326,25 @@ thread_return_t CALLING_CONVENTION slist_test_internal_thread_get_set_user_data(
   time_t
     start_time;
 
-  struct lfds611_slist_element
+  struct lfds_slist_element
     *se = NULL;
 
   assert( slist_test_state != NULL );
 
   sts = (struct slist_test_state *) slist_test_state;
 
-  lfds611_slist_use( sts->ss );
+  lfds_slist_use( sts->ss );
 
   time( &start_time );
 
   while( time(NULL) < start_time + 1 )
   {
     if( se == NULL )
-      lfds611_slist_get_head( sts->ss, &se );
+      lfds_slist_get_head( sts->ss, &se );
 
-    lfds611_slist_set_user_data_in_element( se, (void *) sts->thread_and_count++ );
+    lfds_slist_set_user_data_in_element( se, (void *) sts->thread_and_count++ );
 
-    lfds611_slist_get_next( se, &se );
+    lfds_slist_get_next( se, &se );
   }
 
   return( (thread_return_t) EXIT_SUCCESS );
@@ -357,10 +357,10 @@ thread_return_t CALLING_CONVENTION slist_test_internal_thread_get_set_user_data(
 /****************************************************************************/
 void test_slist_delete_all_elements( void )
 {
-  struct lfds611_slist_state
+  struct lfds_slist_state
     *ss;
 
-  struct lfds611_slist_element
+  struct lfds_slist_element
     *se = NULL;
 
   size_t
@@ -369,8 +369,8 @@ void test_slist_delete_all_elements( void )
   unsigned int
     loop;
 
-  enum lfds611_data_structure_validity
-    dvs = LFDS611_VALIDITY_VALID;
+  enum lfds_data_structure_validity
+    dvs = LFDS_VALIDITY_VALID;
 
   /* TRD : this test creates a list of 100,000 elements
            then simply calls delete_all_elements()
@@ -380,20 +380,20 @@ void test_slist_delete_all_elements( void )
 
   internal_display_test_name( "Delete all elements" );
 
-  lfds611_slist_new( &ss, NULL, NULL );
+  lfds_slist_new( &ss, NULL, NULL );
 
   for( loop = 0 ; loop < 1000000 ; loop++ )
-    lfds611_slist_new_head( ss, NULL );
+    lfds_slist_new_head( ss, NULL );
 
-  lfds611_slist_single_threaded_physically_delete_all_elements( ss );
+  lfds_slist_single_threaded_physically_delete_all_elements( ss );
 
-  while( NULL != lfds611_slist_get_head_and_then_next(ss, &se) )
+  while( NULL != lfds_slist_get_head_and_then_next(ss, &se) )
     element_count++;
 
   if( element_count != 0 )
-    dvs = LFDS611_VALIDITY_INVALID_TEST_DATA;
+    dvs = LFDS_VALIDITY_INVALID_TEST_DATA;
 
-  lfds611_slist_delete( ss );
+  lfds_slist_delete( ss );
 
   internal_display_test_result( 1, "slist", dvs );
 

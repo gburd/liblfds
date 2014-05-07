@@ -5,7 +5,7 @@
 
 
 /****************************************************************************/
-void test_lfds611_freelist( void )
+void test_lfds_freelist( void )
 {
   printf( "\n"
           "Freelist Tests\n"
@@ -30,19 +30,19 @@ void freelist_test_internal_popping( void )
     loop,
     cpu_count;
 
-  lfds611_atom_t
+  lfds_atom_t
     count = 0;
 
   thread_state_t
     *thread_handles;
 
-  enum lfds611_data_structure_validity
-    dvs = LFDS611_VALIDITY_VALID;
+  enum lfds_data_structure_validity
+    dvs = LFDS_VALIDITY_VALID;
 
-  struct lfds611_freelist_state
+  struct lfds_freelist_state
     *fs;
 
-  struct lfds611_freelist_element
+  struct lfds_freelist_element
     *fe;
 
   struct freelist_test_popping_state
@@ -74,12 +74,12 @@ void freelist_test_internal_popping( void )
 
   cpu_count = abstraction_cpu_count();
 
-  lfds611_freelist_new( &fs, 1000000, freelist_test_internal_popping_init, &count );
+  lfds_freelist_new( &fs, 1000000, freelist_test_internal_popping_init, &count );
   ftps = malloc( sizeof(struct freelist_test_popping_state) * cpu_count );
   for( loop = 0 ; loop < cpu_count ; loop++ )
   {
     (ftps+loop)->fs = fs;
-    lfds611_freelist_new( &(ftps+loop)->fs_thread_local, 0, NULL, NULL );
+    lfds_freelist_new( &(ftps+loop)->fs_thread_local, 0, NULL, NULL );
   }
 
   thread_handles = malloc( sizeof(thread_state_t) * cpu_count );
@@ -99,29 +99,29 @@ void freelist_test_internal_popping( void )
 
   for( loop = 0 ; loop < cpu_count ; loop++ )
   {
-    while( lfds611_freelist_pop((ftps+loop)->fs_thread_local, &fe) )
+    while( lfds_freelist_pop((ftps+loop)->fs_thread_local, &fe) )
     {
-      lfds611_freelist_get_user_data_from_element( fe, (void **) &count );
+      lfds_freelist_get_user_data_from_element( fe, (void **) &count );
       (*(found_count+count))++;
-      lfds611_freelist_push( fs, fe );
+      lfds_freelist_push( fs, fe );
     }
   }
 
-  for( loop = 0 ; loop < 1000000 and dvs == LFDS611_VALIDITY_VALID ; loop++ )
+  for( loop = 0 ; loop < 1000000 and dvs == LFDS_VALIDITY_VALID ; loop++ )
   {
     if( *(found_count+loop) == 0 )
-      dvs = LFDS611_VALIDITY_INVALID_MISSING_ELEMENTS;
+      dvs = LFDS_VALIDITY_INVALID_MISSING_ELEMENTS;
 
     if( *(found_count+loop) > 1 )
-      dvs = LFDS611_VALIDITY_INVALID_ADDITIONAL_ELEMENTS;
+      dvs = LFDS_VALIDITY_INVALID_ADDITIONAL_ELEMENTS;
   }
 
   // TRD : cleanup
   free( found_count );
   for( loop = 0 ; loop < cpu_count ; loop++ )
-    lfds611_freelist_delete( (ftps+loop)->fs_thread_local, NULL, NULL );
+    lfds_freelist_delete( (ftps+loop)->fs_thread_local, NULL, NULL );
   free( ftps );
-  lfds611_freelist_delete( fs, NULL, NULL );
+  lfds_freelist_delete( fs, NULL, NULL );
 
   // TRD : print the test result
   internal_display_test_result( 1, "freelist", dvs );
@@ -138,15 +138,15 @@ void freelist_test_internal_popping( void )
 
 int freelist_test_internal_popping_init( void **user_data, void *user_state )
 {
-  lfds611_atom_t
+  lfds_atom_t
     *count;
 
   assert( user_data != NULL );
   assert( user_state != NULL );
 
-  count = (lfds611_atom_t *) user_state;
+  count = (lfds_atom_t *) user_state;
 
-  *(lfds611_atom_t *) user_data = (*count)++;
+  *(lfds_atom_t *) user_data = (*count)++;
 
   return( 1 );
 }
@@ -163,18 +163,18 @@ thread_return_t CALLING_CONVENTION freelist_test_internal_thread_popping( void *
   struct freelist_test_popping_state
     *ftps;
 
-  struct lfds611_freelist_element
+  struct lfds_freelist_element
     *fe;
 
   assert( freelist_test_popping_state != NULL );
 
   ftps = (struct freelist_test_popping_state *) freelist_test_popping_state;
 
-  lfds611_freelist_use( ftps->fs );
-  lfds611_freelist_use( ftps->fs_thread_local );
+  lfds_freelist_use( ftps->fs );
+  lfds_freelist_use( ftps->fs_thread_local );
 
-  while( lfds611_freelist_pop(ftps->fs, &fe) )
-    lfds611_freelist_push( ftps->fs_thread_local, fe );
+  while( lfds_freelist_pop(ftps->fs, &fe) )
+    lfds_freelist_push( ftps->fs_thread_local, fe );
 
   return( (thread_return_t) EXIT_SUCCESS );
 }
@@ -190,22 +190,22 @@ void freelist_test_internal_pushing( void )
     loop,
     cpu_count;
 
-  lfds611_atom_t
+  lfds_atom_t
     count = 0;
 
   thread_state_t
     *thread_handles;
 
-  enum lfds611_data_structure_validity
+  enum lfds_data_structure_validity
     dvs;
 
   struct freelist_test_pushing_state
     *ftps;
 
-  struct lfds611_freelist_element
+  struct lfds_freelist_element
     *fe;
 
-  struct lfds611_freelist_state
+  struct lfds_freelist_state
     *fs,
     *cleanup_fs;
 
@@ -213,7 +213,7 @@ void freelist_test_internal_pushing( void )
     *cnt,
     *counter_and_number_trackers;
 
-  struct lfds611_validation_info
+  struct lfds_validation_info
     vi;
 
   /* TRD : we create an empty freelist, which we will push to
@@ -247,14 +247,14 @@ void freelist_test_internal_pushing( void )
 
   ftps = malloc( sizeof(struct freelist_test_pushing_state) * cpu_count );
 
-  lfds611_freelist_new( &fs, 0, NULL, NULL );
+  lfds_freelist_new( &fs, 0, NULL, NULL );
 
   for( loop = 0 ; loop < cpu_count ; loop++ )
   {
-    (ftps+loop)->thread_number = (lfds611_atom_t) loop;
+    (ftps+loop)->thread_number = (lfds_atom_t) loop;
     // TRD : note count is shared across threads, so thread 0 is 0-100000, thread 1 is 100000-200000, etc
     (ftps+loop)->count = &count;
-    lfds611_freelist_new( &(ftps+loop)->source_fs, 100000, freelist_test_internal_pushing_init, (void *) (ftps+loop) );
+    lfds_freelist_new( &(ftps+loop)->source_fs, 100000, freelist_test_internal_pushing_init, (void *) (ftps+loop) );
     (ftps+loop)->fs = fs;
   }
 
@@ -269,40 +269,40 @@ void freelist_test_internal_pushing( void )
   free( thread_handles );
 
   // TRD : now fully pop and verify the main freelist
-  lfds611_freelist_new( &cleanup_fs, 0, NULL, NULL );
+  lfds_freelist_new( &cleanup_fs, 0, NULL, NULL );
 
   counter_and_number_trackers = malloc( sizeof(struct freelist_test_counter_and_thread_number) * cpu_count );
 
   for( loop = 0 ; loop < cpu_count ; loop++ )
   {
     (counter_and_number_trackers+loop)->counter = 100000 * loop;
-    (counter_and_number_trackers+loop)->thread_number = (lfds611_atom_t) loop;
+    (counter_and_number_trackers+loop)->thread_number = (lfds_atom_t) loop;
   }
 
   vi.min_elements = vi.max_elements = 100000 * cpu_count;
 
-  lfds611_freelist_query( fs, LFDS611_FREELIST_QUERY_VALIDATE, &vi, (void *) &dvs );
+  lfds_freelist_query( fs, LFDS_FREELIST_QUERY_VALIDATE, &vi, (void *) &dvs );
 
-  while( dvs == LFDS611_VALIDITY_VALID and lfds611_freelist_pop(fs, &fe) )
+  while( dvs == LFDS_VALIDITY_VALID and lfds_freelist_pop(fs, &fe) )
   {
-    lfds611_freelist_get_user_data_from_element( fe, (void **) &cnt );
+    lfds_freelist_get_user_data_from_element( fe, (void **) &cnt );
 
     if( cnt->counter != (counter_and_number_trackers+cnt->thread_number)->counter++ )
-      dvs = LFDS611_VALIDITY_INVALID_MISSING_ELEMENTS;
+      dvs = LFDS_VALIDITY_INVALID_MISSING_ELEMENTS;
 
-    lfds611_freelist_push( cleanup_fs, fe );
+    lfds_freelist_push( cleanup_fs, fe );
   }
 
   // TRD : clean up
   free( counter_and_number_trackers );
 
   for( loop = 0 ; loop < cpu_count ; loop++ )
-    lfds611_freelist_delete( (ftps+loop)->source_fs, NULL, NULL );
+    lfds_freelist_delete( (ftps+loop)->source_fs, NULL, NULL );
 
   free( ftps );
 
-  lfds611_freelist_delete( cleanup_fs, freelist_test_internal_pushing_delete, NULL );
-  lfds611_freelist_delete( fs, NULL, NULL );
+  lfds_freelist_delete( cleanup_fs, freelist_test_internal_pushing_delete, NULL );
+  lfds_freelist_delete( fs, NULL, NULL );
 
   // TRD : print the test result
   internal_display_test_result( 1, "freelist", dvs );
@@ -366,18 +366,18 @@ thread_return_t CALLING_CONVENTION freelist_test_internal_thread_pushing( void *
   struct freelist_test_pushing_state
     *ftps;
 
-  struct lfds611_freelist_element
+  struct lfds_freelist_element
     *fe;
 
   assert( freelist_test_pushing_state != NULL );
 
   ftps = (struct freelist_test_pushing_state *) freelist_test_pushing_state;
 
-  lfds611_freelist_use( ftps->source_fs );
-  lfds611_freelist_use( ftps->fs );
+  lfds_freelist_use( ftps->source_fs );
+  lfds_freelist_use( ftps->fs );
 
-  while( lfds611_freelist_pop(ftps->source_fs, &fe) )
-    lfds611_freelist_push( ftps->fs, fe );
+  while( lfds_freelist_pop(ftps->source_fs, &fe) )
+    lfds_freelist_push( ftps->fs, fe );
 
   return( (thread_return_t) EXIT_SUCCESS );
 }
@@ -396,16 +396,16 @@ void freelist_test_internal_popping_and_pushing( void )
   thread_state_t
     *thread_handles;
 
-  enum lfds611_data_structure_validity
+  enum lfds_data_structure_validity
     dvs;
 
-  struct lfds611_freelist_state
+  struct lfds_freelist_state
     *fs;
 
   struct freelist_test_popping_and_pushing_state
     *pps;
 
-  struct lfds611_validation_info
+  struct lfds_validation_info
     vi;
 
   /* TRD : we have two threads per CPU
@@ -424,17 +424,17 @@ void freelist_test_internal_popping_and_pushing( void )
 
   cpu_count = abstraction_cpu_count();
 
-  lfds611_freelist_new( &fs, 100000 * cpu_count, NULL, NULL );
+  lfds_freelist_new( &fs, 100000 * cpu_count, NULL, NULL );
 
   pps = malloc( sizeof(struct freelist_test_popping_and_pushing_state) * cpu_count * 2 );
 
   for( loop = 0 ; loop < cpu_count ; loop++ )
   {
     (pps+loop)->fs = fs;
-    lfds611_freelist_new( &(pps+loop)->local_fs, 0, NULL, NULL );
+    lfds_freelist_new( &(pps+loop)->local_fs, 0, NULL, NULL );
 
     (pps+loop+cpu_count)->fs = fs;
-    lfds611_freelist_new( &(pps+loop+cpu_count)->local_fs, 100000, NULL, NULL );
+    lfds_freelist_new( &(pps+loop+cpu_count)->local_fs, 100000, NULL, NULL );
   }
 
   thread_handles = malloc( sizeof(thread_state_t) * cpu_count * 2 );
@@ -451,15 +451,15 @@ void freelist_test_internal_popping_and_pushing( void )
   free( thread_handles );
 
   for( loop = 0 ; loop < cpu_count * 2 ; loop++ )
-    lfds611_freelist_delete( (pps+loop)->local_fs, NULL, NULL );
+    lfds_freelist_delete( (pps+loop)->local_fs, NULL, NULL );
 
   free( pps );
 
   vi.min_elements = vi.max_elements = 100000 * cpu_count * 2;
 
-  lfds611_freelist_query( fs, LFDS611_FREELIST_QUERY_VALIDATE, (void *) &vi, (void *) &dvs );
+  lfds_freelist_query( fs, LFDS_FREELIST_QUERY_VALIDATE, (void *) &vi, (void *) &dvs );
 
-  lfds611_freelist_delete( fs, NULL, NULL );
+  lfds_freelist_delete( fs, NULL, NULL );
 
   // TRD : print the test result
   internal_display_test_result( 1, "freelist", dvs );
@@ -478,7 +478,7 @@ thread_return_t CALLING_CONVENTION freelist_test_internal_thread_popping_and_pus
   struct freelist_test_popping_and_pushing_state
     *pps;
 
-  struct lfds611_freelist_element
+  struct lfds_freelist_element
     *fe;
 
   time_t
@@ -491,8 +491,8 @@ thread_return_t CALLING_CONVENTION freelist_test_internal_thread_popping_and_pus
 
   pps = (struct freelist_test_popping_and_pushing_state *) freelist_test_popping_and_pushing_state;
 
-  lfds611_freelist_use( pps->fs );
-  lfds611_freelist_use( pps->local_fs );
+  lfds_freelist_use( pps->fs );
+  lfds_freelist_use( pps->local_fs );
 
   time( &start_time );
 
@@ -502,17 +502,17 @@ thread_return_t CALLING_CONVENTION freelist_test_internal_thread_popping_and_pus
 
     while( count < 100000 )
     {
-      lfds611_freelist_pop( pps->fs, &fe );
+      lfds_freelist_pop( pps->fs, &fe );
 
       if( fe != NULL )
       {
-        lfds611_freelist_push( pps->local_fs, fe );
+        lfds_freelist_push( pps->local_fs, fe );
         count++;
       }
     }
 
-    while( lfds611_freelist_pop(pps->local_fs, &fe) )
-      lfds611_freelist_push( pps->fs, fe );
+    while( lfds_freelist_pop(pps->local_fs, &fe) )
+      lfds_freelist_push( pps->fs, fe );
   }
 
   return( (thread_return_t) EXIT_SUCCESS );
@@ -528,7 +528,7 @@ thread_return_t CALLING_CONVENTION freelist_test_internal_thread_popping_and_pus
   struct freelist_test_popping_and_pushing_state
     *pps;
 
-  struct lfds611_freelist_element
+  struct lfds_freelist_element
     *fe;
 
   time_t
@@ -541,33 +541,33 @@ thread_return_t CALLING_CONVENTION freelist_test_internal_thread_popping_and_pus
 
   pps = (struct freelist_test_popping_and_pushing_state *) freelist_test_popping_and_pushing_state;
 
-  lfds611_freelist_use( pps->fs );
-  lfds611_freelist_use( pps->local_fs );
+  lfds_freelist_use( pps->fs );
+  lfds_freelist_use( pps->local_fs );
 
   time( &start_time );
 
   while( time(NULL) < start_time + 10 )
   {
-    while( lfds611_freelist_pop(pps->local_fs, &fe) )
-      lfds611_freelist_push( pps->fs, fe );
+    while( lfds_freelist_pop(pps->local_fs, &fe) )
+      lfds_freelist_push( pps->fs, fe );
 
     count = 0;
 
     while( count < 1000 )
     {
-      lfds611_freelist_pop( pps->fs, &fe );
+      lfds_freelist_pop( pps->fs, &fe );
 
       if( fe != NULL )
       {
-        lfds611_freelist_push( pps->local_fs, fe );
+        lfds_freelist_push( pps->local_fs, fe );
         count++;
       }
     }
   }
 
   // TRD : now push whatever we have in our local freelist
-  while( lfds611_freelist_pop(pps->local_fs, &fe) )
-    lfds611_freelist_push( pps->fs, fe );
+  while( lfds_freelist_pop(pps->local_fs, &fe) )
+    lfds_freelist_push( pps->fs, fe );
 
   return( (thread_return_t) EXIT_SUCCESS );
 }
@@ -586,13 +586,13 @@ void freelist_test_internal_rapid_popping_and_pushing( void )
   thread_state_t
     *thread_handles;
 
-  struct lfds611_freelist_state
+  struct lfds_freelist_state
     *fs;
 
-  struct lfds611_validation_info
+  struct lfds_validation_info
     vi;
 
-  enum lfds611_data_structure_validity
+  enum lfds_data_structure_validity
     dvs;
 
   /* TRD : in these tests there is a fundamental antagonism between
@@ -625,7 +625,7 @@ void freelist_test_internal_rapid_popping_and_pushing( void )
 
   cpu_count = abstraction_cpu_count();
 
-  lfds611_freelist_new( &fs, cpu_count, NULL, NULL );
+  lfds_freelist_new( &fs, cpu_count, NULL, NULL );
 
   thread_handles = malloc( sizeof(thread_state_t) * cpu_count );
 
@@ -640,9 +640,9 @@ void freelist_test_internal_rapid_popping_and_pushing( void )
   vi.min_elements = cpu_count;
   vi.max_elements = cpu_count;
 
-  lfds611_freelist_query( fs, LFDS611_FREELIST_QUERY_VALIDATE, (void *) &vi, (void *) &dvs );
+  lfds_freelist_query( fs, LFDS_FREELIST_QUERY_VALIDATE, (void *) &vi, (void *) &dvs );
 
-  lfds611_freelist_delete( fs, NULL, NULL );
+  lfds_freelist_delete( fs, NULL, NULL );
 
   // TRD : print the test result
   internal_display_test_result( 1, "freelist", dvs );
@@ -655,29 +655,29 @@ void freelist_test_internal_rapid_popping_and_pushing( void )
 
 
 /****************************************************************************/
-thread_return_t CALLING_CONVENTION freelist_test_internal_thread_rapid_popping_and_pushing( void *lfds611_freelist_state )
+thread_return_t CALLING_CONVENTION freelist_test_internal_thread_rapid_popping_and_pushing( void *lfds_freelist_state )
 {
-  struct lfds611_freelist_state
+  struct lfds_freelist_state
     *fs;
 
-  struct lfds611_freelist_element
+  struct lfds_freelist_element
     *fe;
 
   time_t
     start_time;
 
-  assert( lfds611_freelist_state != NULL );
+  assert( lfds_freelist_state != NULL );
 
-  fs = (struct lfds611_freelist_state *) lfds611_freelist_state;
+  fs = (struct lfds_freelist_state *) lfds_freelist_state;
 
-  lfds611_freelist_use( fs );
+  lfds_freelist_use( fs );
 
   time( &start_time );
 
   while( time(NULL) < start_time + 10 )
   {
-    lfds611_freelist_pop( fs, &fe );
-    lfds611_freelist_push( fs, fe );
+    lfds_freelist_pop( fs, &fe );
+    lfds_freelist_push( fs, fe );
   }
 
   return( (thread_return_t) EXIT_SUCCESS );

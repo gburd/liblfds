@@ -5,23 +5,23 @@
 
 
 /****************************************************************************/
-void benchmark_lfds611_freelist( void )
+void benchmark_lfds_freelist( void )
 {
   unsigned int
     loop,
     thread_count,
     cpu_count;
 
-  struct lfds611_freelist_state
+  struct lfds_freelist_state
     *fs;
 
-  struct lfds611_freelist_benchmark
+  struct lfds_freelist_benchmark
     *fb;
 
   thread_state_t
     *thread_handles;
 
-  lfds611_atom_t
+  lfds_atom_t
     total_operations_for_full_test_for_all_cpus,
     total_operations_for_full_test_for_all_cpus_for_one_cpu = 0;
 
@@ -42,18 +42,18 @@ void benchmark_lfds611_freelist( void )
 
   thread_handles = (thread_state_t *) malloc( sizeof(thread_state_t) * cpu_count );
 
-  fb = (struct lfds611_freelist_benchmark *) malloc( sizeof(struct lfds611_freelist_benchmark) * cpu_count );
+  fb = (struct lfds_freelist_benchmark *) malloc( sizeof(struct lfds_freelist_benchmark) * cpu_count );
 
   // TRD : print the benchmark ID and CSV header
   printf( "\n"
           "Release %s Freelist Benchmark #1\n"
-          "CPUs,total ops,mean ops/sec per CPU,standard deviation,scalability\n", LFDS611_RELEASE_NUMBER_STRING );
+          "CPUs,total ops,mean ops/sec per CPU,standard deviation,scalability\n", LFDS_RELEASE_NUMBER_STRING );
 
   // TRD : we run CPU count times for scalability
   for( thread_count = 1 ; thread_count <= cpu_count ; thread_count++ )
   {
     // TRD : initialisation
-    lfds611_freelist_new( &fs, 1000, NULL, NULL );
+    lfds_freelist_new( &fs, 1000, NULL, NULL );
 
     for( loop = 0 ; loop < cpu_count ; loop++ )
     {
@@ -63,7 +63,7 @@ void benchmark_lfds611_freelist( void )
 
     // TRD : main test
     for( loop = 0 ; loop < thread_count ; loop++ )
-      abstraction_thread_start( &thread_handles[loop], loop, benchmark_lfds611_freelist_thread_pop_and_push, fb+loop );
+      abstraction_thread_start( &thread_handles[loop], loop, benchmark_lfds_freelist_thread_pop_and_push, fb+loop );
 
     for( loop = 0 ; loop < thread_count ; loop++ )
       abstraction_thread_wait( thread_handles[loop] );
@@ -93,7 +93,7 @@ void benchmark_lfds611_freelist( void )
     printf( "%u,%u,%.0f,%.0f,%0.2f\n", thread_count, (unsigned int) total_operations_for_full_test_for_all_cpus, mean_operations_per_second_per_cpu, std_dev_per_second_per_cpu, scalability );
 
     // TRD : cleanup
-    lfds611_freelist_delete( fs, NULL, NULL );
+    lfds_freelist_delete( fs, NULL, NULL );
   }
 
   free( fb );
@@ -108,12 +108,12 @@ void benchmark_lfds611_freelist( void )
 
 
 /****************************************************************************/
-thread_return_t CALLING_CONVENTION benchmark_lfds611_freelist_thread_pop_and_push( void *freelist_benchmark )
+thread_return_t CALLING_CONVENTION benchmark_lfds_freelist_thread_pop_and_push( void *freelist_benchmark )
 {
-  struct lfds611_freelist_benchmark
+  struct lfds_freelist_benchmark
     *fb;
 
-  struct lfds611_freelist_element
+  struct lfds_freelist_element
     *fe;
 
   time_t
@@ -121,14 +121,14 @@ thread_return_t CALLING_CONVENTION benchmark_lfds611_freelist_thread_pop_and_pus
 
   assert( freelist_benchmark != NULL );
 
-  fb = (struct lfds611_freelist_benchmark *) freelist_benchmark;
+  fb = (struct lfds_freelist_benchmark *) freelist_benchmark;
 
   time( &start_time );
 
   while( time(NULL) < start_time + 10 )
   {
-    lfds611_freelist_pop( fb->fs, &fe );
-    lfds611_freelist_push( fb->fs, fe );
+    lfds_freelist_pop( fb->fs, &fe );
+    lfds_freelist_push( fb->fs, fe );
 
     fb->operation_count += 2;
   }

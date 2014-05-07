@@ -5,23 +5,23 @@
 
 
 /****************************************************************************/
-void benchmark_lfds611_queue( void )
+void benchmark_lfds_queue( void )
 {
   unsigned int
     loop,
     thread_count,
     cpu_count;
 
-  struct lfds611_queue_state
+  struct lfds_queue_state
     *qs;
 
-  struct lfds611_queue_benchmark
+  struct lfds_queue_benchmark
     *qb;
 
   thread_state_t
     *thread_handles;
 
-  lfds611_atom_t
+  lfds_atom_t
     total_operations_for_full_test_for_all_cpus,
     total_operations_for_full_test_for_all_cpus_for_one_cpu = 0;
 
@@ -42,18 +42,18 @@ void benchmark_lfds611_queue( void )
 
   thread_handles = (thread_state_t *) malloc( sizeof(thread_state_t) * cpu_count );
 
-  qb = (struct lfds611_queue_benchmark *) malloc( sizeof(struct lfds611_queue_benchmark) * cpu_count );
+  qb = (struct lfds_queue_benchmark *) malloc( sizeof(struct lfds_queue_benchmark) * cpu_count );
 
   // TRD : print the benchmark ID and CSV header
   printf( "\n"
           "Release %s Queue Benchmark #1\n"
-          "CPUs,total ops,mean ops/sec per CPU,standard deviation,scalability\n", LFDS611_RELEASE_NUMBER_STRING );
+          "CPUs,total ops,mean ops/sec per CPU,standard deviation,scalability\n", LFDS_RELEASE_NUMBER_STRING );
 
   // TRD : we run CPU count times for scalability
   for( thread_count = 1 ; thread_count <= cpu_count ; thread_count++ )
   {
     // TRD : initialisation
-    lfds611_queue_new( &qs, 1000 );
+    lfds_queue_new( &qs, 1000 );
 
     for( loop = 0 ; loop < cpu_count ; loop++ )
     {
@@ -63,11 +63,11 @@ void benchmark_lfds611_queue( void )
 
     // TRD : populate the queue (we don't actually use the user data)
     for( loop = 0 ; loop < 500 ; loop++ )
-      lfds611_queue_enqueue( qs, (void *) (lfds611_atom_t) loop );
+      lfds_queue_enqueue( qs, (void *) (lfds_atom_t) loop );
 
     // TRD : main test
     for( loop = 0 ; loop < thread_count ; loop++ )
-      abstraction_thread_start( &thread_handles[loop], loop, benchmark_lfds611_queue_thread_delfds611_queue_and_enqueue, qb+loop );
+      abstraction_thread_start( &thread_handles[loop], loop, benchmark_lfds_queue_thread_delfds_queue_and_enqueue, qb+loop );
 
     for( loop = 0 ; loop < thread_count ; loop++ )
       abstraction_thread_wait( thread_handles[loop] );
@@ -97,7 +97,7 @@ void benchmark_lfds611_queue( void )
     printf( "%u,%u,%.0f,%.0f,%0.2f\n", thread_count, (unsigned int) total_operations_for_full_test_for_all_cpus, mean_operations_per_second_per_cpu, std_dev_per_second_per_cpu, scalability );
 
     // TRD : cleanup
-    lfds611_queue_delete( qs, NULL, NULL );
+    lfds_queue_delete( qs, NULL, NULL );
   }
 
   free( qb );
@@ -112,9 +112,9 @@ void benchmark_lfds611_queue( void )
 
 
 /****************************************************************************/
-thread_return_t CALLING_CONVENTION benchmark_lfds611_queue_thread_delfds611_queue_and_enqueue( void *queue_benchmark )
+thread_return_t CALLING_CONVENTION benchmark_lfds_queue_thread_delfds_queue_and_enqueue( void *queue_benchmark )
 {
-  struct lfds611_queue_benchmark
+  struct lfds_queue_benchmark
     *qb;
 
   void
@@ -125,14 +125,14 @@ thread_return_t CALLING_CONVENTION benchmark_lfds611_queue_thread_delfds611_queu
 
   assert( queue_benchmark != NULL );
 
-  qb = (struct lfds611_queue_benchmark *) queue_benchmark;
+  qb = (struct lfds_queue_benchmark *) queue_benchmark;
 
   time( &start_time );
 
   while( time(NULL) < start_time + 10 )
   {
-    lfds611_queue_dequeue( qb->qs, &user_data );
-    lfds611_queue_enqueue( qb->qs, user_data );
+    lfds_queue_dequeue( qb->qs, &user_data );
+    lfds_queue_enqueue( qb->qs, user_data );
 
     qb->operation_count += 2;
   }

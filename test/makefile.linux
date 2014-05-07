@@ -1,7 +1,7 @@
 ##### paths #####
 BINDIR = bin
-INCDIR = ../liblfds611/inc
-LIBDIR = ../liblfds611/bin
+INCDIR = ../liblfds/inc
+LIBDIR = ../liblfds/bin
 OBJDIR = obj
 SRCDIR = src
 
@@ -15,7 +15,7 @@ SRCDIRS = .
 SOURCES = abstraction_cpu_count.c test_abstraction.c abstraction_thread_start.c abstraction_thread_wait.c benchmark_freelist.c benchmark_queue.c benchmark_ringbuffer.c benchmark_stack.c test_freelist.c main.c misc.c test_queue.c test_ringbuffer.c test_slist.c test_stack.c
 OBJECTS = $(patsubst %.c,$(OBJDIR)/%.o,$(notdir $(SOURCES)))
 SYSLIBS = -lpthread -lc -lm
-USRLIBS = -llfds611
+USRLIBS = -llfds
 
 ##### CPU variants #####
 UNAME   = $(shell uname -m)
