@@ -1,0 +1,10 @@
+ag -l lfds611 | grep -v rm-version | xargs -L 1 perl -pi -e 's/lfds611/lfds/g'
+ag -l LFDS611 | grep -v rm-version | xargs -L 1 perl -pi -e 's/LFDS611/LFDS/g'
+git status | grep modified: | grep 611 | awk '{print $2}' | xargs dirname | uniq | sed 's/611//g' | xargs mkdir -p
+git status | grep modified: | grep 611 | awk '{str=$2; gsub("611", "", str); print $2, str}' | xargs -L 1 git mv
+git mv liblfds611/building.txt liblfds
+git mv liblfds611/readme.txt liblfds
+git mv liblfds611/runme_before_win_kernel_build_readme.txt liblfds
+git mv liblfds611/src/driver_entry_readme.txt liblfds/src
+git mv liblfds611/src/lfds611_abstraction/lfds611_abstraction_internal_body.h liblfds/src/lfds_abstraction/lfds_abstraction_internal_body.h
+git mv liblfds611/src/lfds611_liblfds/lfds611_liblfds_readme.txt liblfds/src/lfds_liblfds/lfds_liblfds_readme.txt
